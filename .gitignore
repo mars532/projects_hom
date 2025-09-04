@@ -1,0 +1,31 @@
+     # Python
+     _ __pycache__ _/
+     *.py[cod]
+     *$py.class
+
+     # Директории виртуальных окружений
+     venv/
+     env/
+     .env/
+     .venv/
+     .envrc
+
+     # IDEs
+     .idea/
+     .vscode/
+     .ropeproject/
+
+     # Jupyter Notebook
+     .ipynb_checkpoints
+
+     # Модули
+     .mypy_cache/
+     .pytest_cache/
+
+     # Другие временные файлы
+     *.log
+     *.pot
+     *.pyc
+     *.pyo
+     .DS_Store
+     Thumbs.db
