@@ -16,3 +16,5 @@ from masking import get_mask_card_number, get_mask_account
 
 print(get_mask_card_number("1234 5678 9876 5432"))  # 1234 56** **** 5432
 print(get_mask_account("40817810099910004312"))     # **4312
+
+"
