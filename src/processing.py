@@ -1,61 +1,70 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Iterable, List, Dict, Any
+from typing import Any, Dict, Iterable, List
 
 
-def _parse_iso_dt(value: str) -> datetime:
+def _parse_iso8601(value: str) -> datetime:
     """
-    Аккуратно парсит ISO 8601 дату вида 'YYYY-MM-DDTHH:MM:SS[.ffffff]'.
-
-    Допускаем суффиксы 'Z' или смещения таймзоны '±HH:MM' — отбрасываем их
-    для целей сортировки по дате.
+    Безопасно парсит ISO 8601 строку вида:
+    - 'YYYY-MM-DDTHH:MM:SS'
+    - 'YYYY-MM-DDTHH:MM:SS.ffffff'
+    - допускает 'Z' и оффсеты '±HH:MM' (отрезаем их для сортировки).
     """
     s = value.strip()
-    # убираем 'Z' или оффсет таймзоны, если есть
     if s.endswith("Z"):
         s = s[:-1]
-    if len(s) >= 6 and (s[-6] in "+-") and (s[-3] == ":") and s[-5:-3].isdigit() and s[-2:].isdigit():
+    # отрезаем смещение таймзоны, если есть (например, '+03:00' или '-05:00')
+    if len(s) >= 6 and (s[-6] in "+-") and s[-3] == ":" and s[-5:-3].isdigit() and s[-2:].isdigit():
         s = s[:-6]
 
-    # пробуем с микросекундами и без
-    for fmt in ("%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S"):
+    for fmt in ("%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
         try:
             return datetime.strptime(s, fmt)
         except ValueError:
-            pass
-    # как запасной вариант — просто дата без времени
-    try:
-        return datetime.strptime(s, "%Y-%m-%d")
-    except ValueError as e:
-        raise ValueError(f"Некорректный формат даты: {value}") from e
+            continue
+
+    # запасной вариант: бросаем информативную ошибку
+    raise ValueError(f"Некорректный формат даты: {value!r}")
 
 
-def filter_by_state(items: Iterable[Dict[str, Any]], state: str = "EXECUTED") -> List[Dict[str, Any]]:
+def filter_by_state(operations: Iterable[Dict[str, Any]], state: str = "EXECUTED") -> List[Dict[str, Any]]:
     """
-    Возвращает новый список словарей, оставляя только элементы с заданным state.
+    Возвращает новый список операций, оставляя только элементы с указанным статусом.
 
-    :param items: список/итерируемое со словарями операций
-    :param state: значение ключа 'state' для фильтрации (по умолчанию 'EXECUTED')
-    :return: новый список, где item.get('state') == state
+    Args:
+        operations: итерируемое из словарей операций (ожидается ключ 'state').
+        state: значение ключа 'state' для фильтрации (по умолчанию 'EXECUTED').
+
+    Returns:
+        Новый list с операциями, где op.get('state') == state.
+
+    Пример:
+        >>> filter_by_state([{'state': 'EXECUTED'}, {'state': 'CANCELED'}])
+        [{'state': 'EXECUTED'}]
     """
-    # делаем иммутабельный результат: создаём новый список
-    return [op for op in items if isinstance(op, dict) and op.get("state") == state]
+    return [op for op in operations if isinstance(op, dict) and op.get("state") == state]
 
 
-def sort_by_date(items: Iterable[Dict[str, Any]], descending: bool = True) -> List[Dict[str, Any]]:
+def sort_by_date(operations: Iterable[Dict[str, Any]], descending: bool = True) -> List[Dict[str, Any]]:
     """
-    Сортирует список словарей по ключу 'date'.
+    Сортирует операции по ключу 'date'.
 
-    :param items: список/итерируемое со словарями операций
-    :param descending: порядок сортировки; True — по убыванию (сначала новые)
-    :return: НОВЫЙ отсортированный список
+    Args:
+        operations: итерируемое из словарей операций (ожидается строковый ключ 'date').
+        descending: порядок сортировки; True — по убыванию (сначала самые новые).
+
+    Returns:
+        Новый list, отсортированный по дате.
+
+    Пример:
+        >>> sort_by_date([{'date': '2019-01-02T00:00:00'}, {'date': '2018-01-02T00:00:00'}])
+        [{'date': '2019-01-02T00:00:00'}, {'date': '2018-01-02T00:00:00'}]
     """
     def keyfunc(op: Dict[str, Any]) -> datetime:
         value = op.get("date")
         if not isinstance(value, str):
-            raise ValueError("Каждый элемент должен иметь строковый ключ 'date'")
-        return _parse_iso_dt(value)
+            raise ValueError("Каждая операция должна иметь строковый ключ 'date'")
+        return _parse_iso8601(value)
 
-    # создаём копию и сортируем её
-    return sorted(list(items), key=keyfunc, reverse=descending)
+    return sorted(list(operations), key=keyfunc, reverse=descending)
