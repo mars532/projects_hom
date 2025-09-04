@@ -64,11 +64,11 @@ def mask_account_card(info: str) -> str:
     number = parts[1]
 
     # Если это номер карты, используем get_mask_card_number
-    if any(issuer in card_type.lower() for issuer in ['карта', 'visa', 'maestro', 'mastercard']):
+    if any(issuer in card_type.lower() for issuer in ["карта", "visa", "maestro", "mastercard"]):
         return f"{card_type} {get_mask_card_number(number)}"
 
     # Если это счет, используем get_mask_account
-    elif 'счет' in card_type.lower():
+    elif "счет" in card_type.lower():
         return f"{card_type} {get_mask_account(number)}"
 
     raise ValueError("Неизвестный тип информации")

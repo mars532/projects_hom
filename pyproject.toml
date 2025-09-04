@@ -20,9 +20,7 @@ isort = "^6.0.1"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[
-tool.black
-]
+[tool.black]
 line-length = 119
 exclude = '''
 (

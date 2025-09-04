@@ -53,5 +53,5 @@ if __name__ == "__main__":
     card = "1234 5678 9876 5432"
     account = "40817810099910004312"
 
-    print("Маска карты:", get_mask_card_number(card))    # 1234 56** **** 5432
-    print("Маска счёта:", get_mask_account(account))   # **4312
+    print("Маска карты:", get_mask_card_number(card))  # 1234 56** **** 5432
+    print("Маска счёта:", get_mask_account(account))  # **4312

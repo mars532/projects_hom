@@ -63,8 +63,15 @@ def mask_account_card(info: str) -> str:
     is_card = any(
         key in t
         for key in (
-            "карта", "visa", "maestro", "mastercard", "master card",
-            "mir", "american express", "amex", "electron"
+            "карта",
+            "visa",
+            "maestro",
+            "mastercard",
+            "master card",
+            "mir",
+            "american express",
+            "amex",
+            "electron",
         )
     )
     is_account = any(key in t for key in ("счет", "счёт", "account", "acct"))
@@ -114,8 +121,7 @@ def get_date(date_string: str) -> str:
         return dt.strftime("%d.%m.%Y")
     except Exception as e:  # noqa: BLE001
         raise ValueError(
-            "Некорректная дата: ожидаю ISO 8601 вида "
-            "'YYYY-MM-DD[THH:MM:SS[.ffffff]][Z|±HH:MM]'"
+            "Некорректная дата: ожидаю ISO 8601 вида " "'YYYY-MM-DD[THH:MM:SS[.ffffff]][Z|±HH:MM]'"
         ) from e
 
 
@@ -123,6 +129,6 @@ if __name__ == "__main__":
     card_data = "Visa Platinum 7000792289606361"
     account_data = "Счет 73654108430135874305"
 
-    print("Карта:", mask_account_card(card_data))    # Visa Platinum 7000 79 ** 6361
+    print("Карта:", mask_account_card(card_data))  # Visa Platinum 7000 79 ** 6361
     print("Счёт:", mask_account_card(account_data))  # Счет **4305
     print("Дата:", get_date("2018-07-11T02:26:18.671407"))  # 11.07.2018

@@ -29,3 +29,6 @@
      *.pyo
      .DS_Store
      Thumbs.db
+
+     # noqa
+     *.E501
